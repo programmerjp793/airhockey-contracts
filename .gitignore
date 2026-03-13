@@ -1,0 +1,13 @@
+# Environment variables - NEVER commit these
+.env
+.env.local
+
+# Dependencies
+node_modules/
+
+# Hardhat
+cache/
+artifacts/
+
+# Logs
+*.log
