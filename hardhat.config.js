@@ -33,10 +33,8 @@ module.exports = {
   },
 
   etherscan: {
-    // Verify: npx hardhat verify --network sepolia <ADDR> <arg1> <arg2>
-    apiKey: {
-      sepolia: process.env.ETHERSCAN_API_KEY || "D7PWDIPXT2VYY6WGURCJ2YUJP4ANR197N2",
-    },
+    // Use Etherscan V2 API - single API key for all networks
+    apiKey: process.env.ETHERSCAN_API_KEY || "D7PWDIPXT2VYY6WGURCJ2YUJP4ANR197N2"
   },
 
   gasReporter: {

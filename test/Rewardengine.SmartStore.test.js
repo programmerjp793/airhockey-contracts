@@ -72,43 +72,34 @@ describe("SmartStore (Native ETH)", function () {
 
   it("item 1 costs 0.001 ETH", async () => {
     const item = await store.items(1);
-    expect(item.priceETH).to.equal(ethers.parseEther("0.001"));
-    expect(item.tier).to.equal(1);
+    expect(item.price).to.equal(ethers.parseEther("0.001"));
   });
 
   it("player purchases Wallet Upgrade I with exact ETH", async () => {
     const price      = ethers.parseEther("0.001");
     const treaBefore = await ethers.provider.getBalance(treasury.address);
-    await store.connect(player).purchaseItem(1, { value: price });
+    await store.connect(player).buyItem(1, { value: price });
     const treaAfter  = await ethers.provider.getBalance(treasury.address);
     expect(treaAfter - treaBefore).to.equal(price);
-    expect(await store.playerTier(player.address)).to.equal(1);
+    expect(await store.hasPlayerBoughtItem(player.address, 1)).to.be.true;
   });
 
   it("reverts if wrong ETH amount", async () => {
     await expect(
-      store.connect(player).purchaseItem(1, { value: ethers.parseEther("0.999") })
-    ).to.be.revertedWith("Incorrect ETH amount sent");
-  });
-
-  it("reverts if player skips tier", async () => {
-    await expect(
-      store.connect(player).purchaseItem(2, { value: ethers.parseEther("0.003") })
-    ).to.be.revertedWith("Must upgrade tiers in order");
+      store.connect(player).buyItem(1, { value: ethers.parseEther("0.0005") })
+    ).to.be.revertedWith("Insufficient ETH payment");
   });
 
   it("reverts if already owned", async () => {
-    await store.connect(player).purchaseItem(1, { value: ethers.parseEther("0.001") });
+    await store.connect(player).buyItem(1, { value: ethers.parseEther("0.001") });
     await expect(
-      store.connect(player).purchaseItem(1, { value: ethers.parseEther("0.001") })
+      store.connect(player).buyItem(1, { value: ethers.parseEther("0.001") })
     ).to.be.revertedWith("Already owned");
   });
 
-  it("getPlayerInfo returns tier and owned items", async () => {
-    await store.connect(player).purchaseItem(1, { value: ethers.parseEther("0.001") });
-    const [, tier, owned] = await store.getPlayerInfo(player.address);
-    expect(tier).to.equal(1);
-    expect(owned[0]).to.be.true;
-    expect(owned[1]).to.be.false;
+  it("getPlayerItems returns owned items", async () => {
+    await store.connect(player).buyItem(1, { value: ethers.parseEther("0.001") });
+    const owned = await store.getPlayerItems(player.address);
+    expect(owned).to.deep.equal([1n]);
   });
 });
